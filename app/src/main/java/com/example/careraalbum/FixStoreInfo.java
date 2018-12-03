@@ -14,25 +14,30 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.amap.api.services.core.AMapException;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
 
+import java.security.PublicKey;
 import java.util.List;
 
 
 public class FixStoreInfo extends AppCompatActivity implements PoiSearch.OnPoiSearchListener {
     private final int CALL=1;
+    private static int flag=0;//标志，当定位结果从服务器返回时置为1
     private PoiResult poiResult; // poi返回的结果
     private int currentPage = 0;// 当前页面，从0开始计数
     private PoiSearch.Query query;// Poi查询条件类
     private PoiSearch poiSearch;// POI搜索
-    private LatLonPoint startPoint=new LatLonPoint(29.878983,106.774592);//暂定起点为北京理工大学
-//    private LatLonPoint startPoint=new LatLonPoint(39.959985,116.3152);//暂定起点为北京理工大学
-    //设置搜索矩形,参数为搜索起点及搜索范围
-    private PoiSearch.SearchBound searchBound=new PoiSearch.SearchBound(startPoint,5000);
+    private static LatLonPoint startPoint=new LatLonPoint(0,0);//搜索起点
+    //搜索矩形,参数为搜索起点及搜索范围
+    private PoiSearch.SearchBound searchBound=null;
     private String fixStoreName=new String("");//维修点名称
     private String fixStoreAddress=new String("");//维修点地址
     private String fixStoreTel=new String("");//维修点电话
@@ -86,10 +91,24 @@ public class FixStoreInfo extends AppCompatActivity implements PoiSearch.OnPoiSe
             }
         });
 
+        //使用定位SDK先获取起点坐标,为startPoint赋值
+        getLocation();
+
+        //等待服务器返回定位结果
+        try {
+            Thread.currentThread();
+            Thread.sleep(3000);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
+
+
         //webView加载高德地图网页版
         webView.getSettings().setJavaScriptEnabled(true);//支持js脚本
         webView.setWebViewClient(new WebViewClient());//只在webview控件内加载网页
-        webView.loadUrl("https://m.amap.com/around/?locations=116.3152,39.959985&keywords=汽修,4S&"
+        webView.loadUrl("https://m.amap.com/around/?locations="+String.valueOf(startPoint.getLongitude()) +","
+                +String.valueOf(startPoint.getLatitude())+"&keywords=汽修,4S&"
                 +"defaultIndex=1&defaultView=list&searchRadius=5000&key=e97aad32b5973220e0a739c519971d10");
 
         //开始查询POI
@@ -129,6 +148,10 @@ public class FixStoreInfo extends AppCompatActivity implements PoiSearch.OnPoiSe
         query.setPageNum(currentPage);
 
         poiSearch=new PoiSearch(this,query);
+        if(0==startPoint.getLongitude()&&0==startPoint.getLatitude())
+           Toast.makeText(FixStoreInfo.this,"起始点异常为空",Toast.LENGTH_SHORT).show();
+        //搜索矩形,参数为搜索起点及搜索范围
+        searchBound=new PoiSearch.SearchBound(startPoint,5000);
         //设置矩形查询范围
         poiSearch.setBound(searchBound);
         //设置监听器，返回结果时触发回调
@@ -165,7 +188,6 @@ public class FixStoreInfo extends AppCompatActivity implements PoiSearch.OnPoiSe
                         for( String s:tels){
                             FixStoreInfo.fixStoreInfo.append(s+"\n");
                         }
-//                        FixStoreInfo.fixStoreInfo.setGravity(Gravity.CENTER);
                     } else {
                         Toast.makeText(FixStoreInfo.this,"未查询到维修点",Toast.LENGTH_SHORT).show();
                     }
@@ -181,5 +203,47 @@ public class FixStoreInfo extends AppCompatActivity implements PoiSearch.OnPoiSe
     @Override
     public void onPoiItemSearched(PoiItem item,int rCode){
         //此处无显示POI item的界面，do nothing
+    }
+
+    //调用高德定位SDK获取当前位置，为startPoint赋值
+    public void getLocation(){
+        AMapLocationClient mapLocationClient=new AMapLocationClient(this.getApplicationContext());
+        AMapLocationListener mapLocationListener=new AMapLocationListener() {
+            //监听Location的回调函数,在其中解析坐标信息
+            @Override
+            public void onLocationChanged(AMapLocation aMapLocation) {
+                if(null!=aMapLocation){
+                    if(aMapLocation.getErrorCode()==0){
+                        //获得纬度
+                        startPoint.setLatitude(aMapLocation.getLatitude());
+                        //获得经度
+                        startPoint.setLongitude(aMapLocation.getLongitude());
+                        Toast.makeText(FixStoreInfo.this,"经度:"+String.valueOf(aMapLocation.getLongitude())
+                                +"纬度:"+String.valueOf(aMapLocation.getLatitude()),Toast.LENGTH_LONG);
+                    }else{
+                        Toast.makeText(FixStoreInfo.this,"定位当前位置失败",Toast.LENGTH_SHORT).show();
+                    }
+                }
+                //服务器返回结果完成,flag置为1
+                flag=1;
+            }
+        };
+        //设置Location监听器
+        mapLocationClient.setLocationListener(mapLocationListener);
+
+        //在其中配置定位功能选项
+        AMapLocationClientOption option=new AMapLocationClientOption();
+        //只进行一次定位
+        option.setOnceLocation(true);
+        //使用最近3秒内精度最高的一次定位
+        //option.setOnceLocationLatest(true);
+        //设置网络请求超时时间,10s
+        //option.setHttpTimeOut(10000);
+        //开始定位
+        if(null!=mapLocationClient){
+            mapLocationClient.setLocationOption(option);
+            mapLocationClient.stopLocation();
+            mapLocationClient.startLocation();
+        }
     }
 }

@@ -13,6 +13,15 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <!--允许程序访问CellID或WiFi热点来获取粗略的位置-->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!--用于访问GPS定位-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <!--用于获取wifi的获取权限，wifi信息会用来进行网络定位-->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <!--用于申请调用A-GPS模块-->
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"/>
+    <!--用于申请获取蓝牙信息进行室内定位-->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,10 +29,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <service android:name="com.amap.api.location.APSService"/>
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="2ce1d65f1706285cdbb8366b48b2d137">
-
         </meta-data>
         <activity
             android:name=".MainActivity"
@@ -34,12 +43,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CheckProblems" android:launchMode="singleTask"></activity>
-        <activity android:name=".FindFixStore" android:launchMode="singleTask"></activity>
-        <activity android:name=".FixStoreInfo" android:launchMode="singleTask"></activity>
-        <activity android:name=".GoDirect" android:launchMode="singleTask"></activity>
-        <activity android:name=".WhetherFixFinished" android:launchMode="singleTask"></activity>
-        <activity android:name=".Thanks" android:launchMode="singleTask"></activity>
+        <activity android:name=".CheckProblems" android:launchMode="singleTask"/>
+        <activity android:name=".FindFixStore" android:launchMode="singleTask"/>
+        <activity android:name=".FixStoreInfo" android:launchMode="singleTask"/>
+        <activity android:name=".GoDirect" android:launchMode="singleTask"/>
+        <activity android:name=".WhetherFixFinished" android:launchMode="singleTask"/>
+        <activity android:name=".Thanks" android:launchMode="singleTask"/>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.example.careraalbum.fileprovider"
