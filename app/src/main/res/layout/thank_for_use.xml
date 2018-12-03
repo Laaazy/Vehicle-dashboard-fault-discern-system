@@ -4,6 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background">
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
     <Button
         android:id="@+id/back_to_home_2"
         android:layout_width="40dp"
@@ -34,5 +42,8 @@
         android:background="@mipmap/fix_finish"
         android:layout_below="@id/thanks"
         android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
         android:layout_centerHorizontal="true"/>
+    </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>

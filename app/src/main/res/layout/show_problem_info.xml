@@ -4,6 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background">
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
     <RelativeLayout
         android:layout_width="320dp"
         android:layout_height="220dp"
@@ -42,7 +50,7 @@
             android:layout_marginTop="6dp"
             android:textColor="#fff"
             android:textSize="15sp"
-            android:text="哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈"/>
+            android:text="解析中..."/>
         <TextView
             android:id="@+id/problem_reason"
             android:layout_width="wrap_content"
@@ -63,7 +71,7 @@
             android:layout_marginBottom="12dp"
             android:textColor="#fff"
             android:textSize="15sp"
-            android:text="哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈"/>
+            android:text="解析中..."/>
     </RelativeLayout>
     <Button
         android:id="@+id/find_fix_store"
@@ -76,6 +84,7 @@
         android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:layout_marginBottom="30dp"
         android:layout_gravity="center_horizontal"
         android:background="#8000">
         <TextView
@@ -87,4 +96,6 @@
             android:textColor="#fff"
             android:textSize="20sp"/>
     </RelativeLayout>
+    </LinearLayout>
+    </ScrollView>
 </LinearLayout>

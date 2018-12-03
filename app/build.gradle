@@ -26,5 +26,7 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    //集成高德地图搜索POI功能
+    compile 'com.amap.api:search:latest.integration'
     testCompile 'junit:junit:4.12'
 }
