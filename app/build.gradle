@@ -28,5 +28,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     //集成高德地图搜索POI功能
     compile 'com.amap.api:search:latest.integration'
+    //集成OpenCV库
+    compile project(':openCVLibrary344')
     testCompile 'junit:junit:4.12'
 }
