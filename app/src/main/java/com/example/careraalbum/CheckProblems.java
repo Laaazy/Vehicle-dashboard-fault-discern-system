@@ -11,6 +11,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
+
 
 
 public class CheckProblems extends AppCompatActivity {
@@ -18,11 +31,16 @@ public class CheckProblems extends AppCompatActivity {
     private Uri imageUri;
     //将用于后续图像处理的bitmap
     private Bitmap bitmap=null;
+    //显示图片的imageView
+    private ImageView picture;
+    //返回检测结果的数组
+    private String[] results;
 
 
     //活动构造函数
     @Override
     protected void onCreate(Bundle savedInstanceState){
+        results=new String[10];
         super.onCreate(savedInstanceState);
         ActivityCollector.addActivity(this);
         //不使用原生标题栏
@@ -37,7 +55,7 @@ public class CheckProblems extends AppCompatActivity {
 
         //获取控件实例
         Button check=(Button)findViewById(R.id.find_problem);
-        ImageView picture=(ImageView)findViewById(R.id.picture_show_1);
+        picture=(ImageView)findViewById(R.id.picture_show_1);
         //获取启动该活动的intent
         Intent intent=getIntent();
 
@@ -56,10 +74,26 @@ public class CheckProblems extends AppCompatActivity {
             @Override
             public void onClick(View v){
                 //image handle here...use saved bitmap...get problem_type and problem_reason...
+                try{
+                    System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+                    //bitmap转mat
+                    //或者imageUri.toString()
+                    String path= getExternalCacheDir()+"/output_image.jpg";
+                    Mat src=Imgcodecs.imread(path);
+                    if(src.empty()){
+                        Toast.makeText(CheckProblems.this,"file not found",Toast.LENGTH_SHORT).show();
+                        throw new Exception("no file");
+                    }
+                    Mat dst=dobj(src);
+                }catch(Exception e){
+                    Toast.makeText(CheckProblems.this,"故障未被成功检测",Toast.LENGTH_SHORT).show();
+                    //System.out.println("例外："+e);
+                }
+
                 //故障类型
-                String problem_type=new String("这是故障类型");
+                String problem_type=results[0];
                 //故障原因
-                String problem_reason=new String("这是故障原因");
+                String problem_reason=results[1];
                 Intent intent=new Intent(CheckProblems.this,FindFixStore.class);
                 intent.putExtra("problem_type",problem_type);
                 intent.putExtra("problem_reason",problem_reason);
@@ -74,4 +108,35 @@ public class CheckProblems extends AppCompatActivity {
         super.onDestroy();
         ActivityCollector.removeActivity(this);
     }
+
+    private Mat dobj(Mat src){
+        int i=0;
+        Mat dst=src.clone();
+
+        String path= getExternalCacheDir()+"/cascade.xml";
+        CascadeClassifier objDetector=new CascadeClassifier(path);
+
+        MatOfRect objDetections=new MatOfRect();
+
+        objDetector.detectMultiScale(dst, objDetections);
+
+        if(objDetections.toArray().length<=0){
+            return src;
+        }
+        for(Rect rect:objDetections.toArray()){
+            Imgproc.rectangle(dst, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,0,255),2);
+            results[i++]="发动机故障！";
+            results[i++]="1. 汽油品质不好会导致混合气在气缸内燃烧不充分导致污染灯亮，而且还容易产生积碳。\n" +
+                    "2. 进气道，活塞顶端积碳存在会导致雾化不良从而引起燃烧不充分导致污染灯亮。\n" +
+                    "3. 冷车启动时，特别是天气温度急剧下降时，由于电脑的温度修正问题启动时会导致污染灯亮，但只要温度下降到一定温度不起伏变化后就会相对稳定。\n" +
+                    "4. 发动机行驶里程过长，火花塞工作特性减弱会导致污染灯点亮。\n" +
+                    "5. 积碳过多点火困难会导致点火线圈反向击穿导致点火线圈故障引起点火不良导致燃烧不完全产生的污染灯亮，这种现象有个鲜明的特征就是当点火线圈故障时发动机是始终严重的抖动。如果不是始终的严重抖动那点火线圈基本可以排除。\n" +
+                    "6. 车辆车龄过大机械老化导致发动机工况不良导致燃烧点火不良导致污染灯亮。\n" +
+                    "7. 部分传感器电脑板本身故障导致污染灯亮。\n" +
+                    "...等等，污染灯亮有很多原因导致，但导致最多的是前三项。\n"
+                    + "特别提示： 当污染灯亮时，发动机动作不抖或有点轻微抖动，此时车主在使用时无需担心，可以正常使用，有时间或方便时可以来检查或保养。";
+        }
+        return dst;
+    }
+
 }

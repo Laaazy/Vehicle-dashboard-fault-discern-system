@@ -56,24 +56,6 @@ public class FindFixStore extends AppCompatActivity {
         find_fix_store.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //调用高德地图API打开地图
-//                Intent intent = new Intent();
-//                intent.setAction(Intent.ACTION_VIEW);
-//                intent.addCategory(Intent.CATEGORY_DEFAULT);
-                //将功能Scheme以URI的方式传入data
-                //各参数含义
-                //navi:服务类型
-                //souceApplication:调用高德地图的应用名称
-                //poiname：POI名称
-                //lat：纬度
-                //lon：经度
-                //style：导航方式,0速度快,2路程少
-//                Uri uri = Uri.parse("androidamap://arroundpoi?sourceApplication=myApp&" +
-//                        "keywords=4S店|汽车维修店&lat=36.2&lon=116.1&dev=0");
-//                intent.setData(uri);
-//                startActivity(intent);
-
-
                 Intent intent=new Intent(FindFixStore.this,FixStoreInfo.class);
                 startActivity(intent);
             }

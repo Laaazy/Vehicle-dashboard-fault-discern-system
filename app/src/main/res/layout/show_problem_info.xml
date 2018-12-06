@@ -25,13 +25,18 @@
             android:layout_width="300dp"
             android:layout_height="200dp" />
     </RelativeLayout>
-
+            
+    <ScrollView
+        android:layout_width="320dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:scrollbars="none">
     <RelativeLayout
         android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:background="#8000"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp">
+        android:layout_gravity="center_horizontal">
         <TextView
             android:id="@+id/problem_type"
             android:layout_width="wrap_content"
@@ -66,6 +71,7 @@
             android:layout_width="260dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:gravity="left"
             android:layout_below="@id/problem_reason"
             android:layout_marginTop="6dp"
             android:layout_marginBottom="12dp"
@@ -73,6 +79,7 @@
             android:textSize="15sp"
             android:text="解析中..."/>
     </RelativeLayout>
+    </ScrollView>
     <Button
         android:id="@+id/find_fix_store"
         android:layout_width="50dp"
