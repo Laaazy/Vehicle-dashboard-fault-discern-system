@@ -24,6 +24,13 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 
 public class CheckProblems extends AppCompatActivity {
@@ -109,10 +116,43 @@ public class CheckProblems extends AppCompatActivity {
         ActivityCollector.removeActivity(this);
     }
 
+    private void prepareCascade(){
+        //首先读取文件，解析为string
+        String content="";
+        String line="";
+        InputStream ins=this.getResources().openRawResource(R.raw.cascade);
+        InputStreamReader reader= null;
+        try {
+            reader = new InputStreamReader(ins,"utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        BufferedReader bufferedReader=new BufferedReader(reader);
+        try {
+            while((line=bufferedReader.readLine())!=null){
+                content+=line;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //然后将string作为文件存储到cache目录下
+        File cascade=new File(getExternalCacheDir(),"cascade.xml");
+        if(!cascade.exists()) {
+            try {
+                FileOutputStream fos =new FileOutputStream(cascade);
+                fos.write(content.getBytes());
+                fos.flush();
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     private Mat dobj(Mat src){
         int i=0;
         Mat dst=src.clone();
 
+        prepareCascade();
         String path= getExternalCacheDir()+"/cascade.xml";
         CascadeClassifier objDetector=new CascadeClassifier(path);
 

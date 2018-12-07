@@ -15,8 +15,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+
 import android.Manifest;
 
 public class MainActivity extends AppCompatActivity {
@@ -87,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        //String cascade=getResources().getXml(R.xml.cascade).getName();
     }
 
     //请求许可结果

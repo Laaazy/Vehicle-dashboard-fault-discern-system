@@ -24,9 +24,9 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/logo"
         android:label="What`s wrong?"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/find_problem"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service android:name="com.amap.api.location.APSService"/>
