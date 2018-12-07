@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         //获得输出文件路径，当安卓版本6.0以上时需要使用FileProvider来获取路径否则将被认为不安全
         if (Build.VERSION.SDK_INT >= 24) {
             uri = FileProvider.getUriForFile(MainActivity.this, "com.example.cameraalbum.fileprovider", outputImage);
-        } else {
+        }else {
             uri = Uri.fromFile(outputImage);
         }
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);

@@ -42,6 +42,8 @@ public class CheckProblems extends AppCompatActivity {
     private ImageView picture;
     //返回检测结果的数组
     private String[] results;
+    //返回结果results中包含的条目数，偶数为故障类型，奇数为故障原因，最终条目数为results条
+    int resultsNum=0;
 
 
     //活动构造函数
@@ -97,10 +99,20 @@ public class CheckProblems extends AppCompatActivity {
                     //System.out.println("例外："+e);
                 }
 
-                //故障类型
-                String problem_type=results[0];
-                //故障原因
-                String problem_reason=results[1];
+                //搜索故障类型
+                String problem_type="";
+                for(int i=0;i<resultsNum;i++){
+                    if(i%2==0)
+                    problem_type+=results[i];
+                }
+                //搜索故障原因
+                String problem_reason="";
+                for(int i=0;i<resultsNum;i++) {
+                    if(i%2!=0) {
+                        problem_reason+=results[i-1];
+                        problem_reason += results[i];
+                    }
+                }
                 Intent intent=new Intent(CheckProblems.this,FindFixStore.class);
                 intent.putExtra("problem_type",problem_type);
                 intent.putExtra("problem_reason",problem_reason);
@@ -116,11 +128,35 @@ public class CheckProblems extends AppCompatActivity {
         ActivityCollector.removeActivity(this);
     }
 
-    private void prepareCascade(){
+    private void prepareCascade(int i){
         //首先读取文件，解析为string
         String content="";
         String line="";
-        InputStream ins=this.getResources().openRawResource(R.raw.cascade);
+        InputStream ins=null;
+        if(i==1)
+            ins= this.getResources().openRawResource(R.raw.cascade1);
+        else if(i==2)
+            ins= this.getResources().openRawResource(R.raw.cascade2);
+        else if(i==3)
+            ins= this.getResources().openRawResource(R.raw.cascade3);
+        else if(i==4)
+            ins= this.getResources().openRawResource(R.raw.cascade4);
+        else if(i==5)
+            ins= this.getResources().openRawResource(R.raw.cascade5);
+        else if(i==6)
+            ins= this.getResources().openRawResource(R.raw.cascade6);
+        else if(i==7)
+            ins= this.getResources().openRawResource(R.raw.cascade7);
+        else if(i==8)
+            ins= this.getResources().openRawResource(R.raw.cascade8);
+        else if(i==9)
+            ins= this.getResources().openRawResource(R.raw.cascade9);
+        else if(i==10)
+            ins= this.getResources().openRawResource(R.raw.cascade10);
+        else if(i==11)
+            ins= this.getResources().openRawResource(R.raw.cascade11);
+        else if(i==12)
+            ins= this.getResources().openRawResource(R.raw.cascade12);
         InputStreamReader reader= null;
         try {
             reader = new InputStreamReader(ins,"utf-8");
@@ -136,7 +172,7 @@ public class CheckProblems extends AppCompatActivity {
             e.printStackTrace();
         }
         //然后将string作为文件存储到cache目录下
-        File cascade=new File(getExternalCacheDir(),"cascade.xml");
+        File cascade=new File(getExternalCacheDir(),"cascade"+i+".xml");
         if(!cascade.exists()) {
             try {
                 FileOutputStream fos =new FileOutputStream(cascade);
@@ -148,35 +184,116 @@ public class CheckProblems extends AppCompatActivity {
             }
         }
     }
+
+
     private Mat dobj(Mat src){
-        int i=0;
         Mat dst=src.clone();
+        for(int j=1;j<=12;j++) {
+            //识别出一次之后就不再识别
+            int flag=0;
+            dst=src.clone();
+            //准备好cascadej.xml
+            prepareCascade(j);
+            String path = getExternalCacheDir() + "/cascade"+j+".xml";
+            CascadeClassifier objDetector = new CascadeClassifier(path);
 
-        prepareCascade();
-        String path= getExternalCacheDir()+"/cascade.xml";
-        CascadeClassifier objDetector=new CascadeClassifier(path);
+            MatOfRect objDetections = new MatOfRect();
 
-        MatOfRect objDetections=new MatOfRect();
+            objDetector.detectMultiScale(dst, objDetections);
 
-        objDetector.detectMultiScale(dst, objDetections);
-
-        if(objDetections.toArray().length<=0){
-            return src;
-        }
-        for(Rect rect:objDetections.toArray()){
-            Imgproc.rectangle(dst, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,0,255),2);
-            results[i++]="发动机故障！";
-            results[i++]="1. 汽油品质不好会导致混合气在气缸内燃烧不充分导致污染灯亮，而且还容易产生积碳。\n" +
-                    "2. 进气道，活塞顶端积碳存在会导致雾化不良从而引起燃烧不充分导致污染灯亮。\n" +
-                    "3. 冷车启动时，特别是天气温度急剧下降时，由于电脑的温度修正问题启动时会导致污染灯亮，但只要温度下降到一定温度不起伏变化后就会相对稳定。\n" +
-                    "4. 发动机行驶里程过长，火花塞工作特性减弱会导致污染灯点亮。\n" +
-                    "5. 积碳过多点火困难会导致点火线圈反向击穿导致点火线圈故障引起点火不良导致燃烧不完全产生的污染灯亮，这种现象有个鲜明的特征就是当点火线圈故障时发动机是始终严重的抖动。如果不是始终的严重抖动那点火线圈基本可以排除。\n" +
-                    "6. 车辆车龄过大机械老化导致发动机工况不良导致燃烧点火不良导致污染灯亮。\n" +
-                    "7. 部分传感器电脑板本身故障导致污染灯亮。\n" +
-                    "...等等，污染灯亮有很多原因导致，但导致最多的是前三项。\n"
-                    + "特别提示： 当污染灯亮时，发动机动作不抖或有点轻微抖动，此时车主在使用时无需担心，可以正常使用，有时间或方便时可以来检查或保养。";
+            //不符合分类器对应分类
+            if (objDetections.toArray().length <= 0) {
+                continue;
+            }
+            for (Rect rect : objDetections.toArray()) {
+                if (flag==1)
+                    break;
+                flag=1;
+                Imgproc.rectangle(dst, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 0, 255), 2);
+                if(j==1) {
+                    results[resultsNum++] = "发动机故障！\n";
+                    results[resultsNum++] = "1. 汽油品质差，不达标。\n" +
+                            "2. 氧传感器故障。\n" +
+                            "3. 空气流量传感器故障。\n" +
+                            "4. 火花塞积碳。\n" +
+                            "5. 发动机爆震。\n" +
+                            "6. 水温传感器损坏。\n" +
+                            "7. 发动机缺缸。\n" +
+                            "...等等，污染灯亮有很多原因导致，但导致最多的是前三项。\n";
+                }
+                else if(j==2) {
+                    results[resultsNum++] = "车身稳定系统故障！\n";
+                    results[resultsNum++] = "1. ABS泵故障及ABS泵供电搭铁线路故障。\n" +
+                            "2. 传感器接线头松脱或某个传感器功能失效。\n" +
+                            "3. 相关保险丝熔断或烧蚀。\n" +
+                            "4. 系统信号传播受阻。\n" +
+                            "5. 假故障，系统误报，尝试按下关闭按钮进行重启。\n";
+                }
+                else if(j==3) {
+                    results[resultsNum++] = "灯泡故障！\n";
+                    results[resultsNum++] = "1. 有灯泡不能正常工作或者损坏。\n" +
+                            "2. 指示灯故障。\n";
+                }
+                else if(j==4) {
+                    results[resultsNum++] = "发动机电子稳定系统故障！\n";
+                    results[resultsNum++] = "1. 发动机故障。\n" +
+                            "2. 电子稳定系统故障。\n" +
+                            "3. 指示灯故障。\n" +
+                            "4. 传感器故障。\n" +
+                            "请分别排查各类型故障，详请参见给类型故障原因";
+                }
+                else if(j==5) {
+                    results[resultsNum++] = "机油油位过低！\n";
+                    results[resultsNum++] = "1. 机油油管漏油，机油泵损坏或其零部件磨损超标。\n" +
+                            "2. 机油稀或因发动机温度高造成机油变稀,进而机油泄露。\n" +
+                            "3. 曲轴与大小瓦之间的间隙超标导致机油泄漏。\n" +
+                            "4. 限压阀或泄压阀弹簧过软，发卡或钢珠损伤造成阀的功能消失或减弱导致机油压力降低。\n" +
+                            "5. 机油脏或粘稠导致机油泵不能将机油有效吸入、泵出。\n" +
+                            "6. 机油稀或因发动机温度高造成机油变稀,进而机油泄露。\n";
+                }
+                else if(j==6) {
+                    results[resultsNum++] = "轮胎压力故障！\n";
+                    results[resultsNum++] = "1. 轮胎气压不足。\n" +
+                            "2. 轮胎出现破损情况。\n" +
+                            "3. 被扎导致漏气。\n" +
+                            "4. 胎压传感器故障。\n";
+                }
+                else if(j==7) {
+                    results[resultsNum++] = "前部安全带故障！\n";
+                    results[resultsNum++] = "1. 前排两个座椅安全带没系。\n" +
+                            "2. 传感器故障故障。\n";
+                }
+                else if(j==8) {
+                    results[resultsNum++] = "水温警报！\n";
+                    results[resultsNum++] = "1. 水温过高。\n" +
+                            "2. 水量过低。\n" +
+                            "3. 传感器故障。\n";
+                }
+                else if(j==9) {
+                    results[resultsNum++] = "蓄电池故障！\n";
+                    results[resultsNum++] = "1. 电池电量不够。\n" +
+                            "2. 电池故障。\n" +
+                            "3. 指示灯故障。\n";
+                }
+                else if(j==10) {
+                    results[resultsNum++] = "制动防抱死系统故障！\n";
+                    results[resultsNum++] = "1. 制动防抱死系统故障。\n" +
+                            "2. 传感器故障。\n";
+                }
+                else if(j==11) {
+                    results[resultsNum++] = "制动装置故障！\n";
+                    results[resultsNum++] = "1. 制动装置指示灯故障。\n" +
+                            "2. 传感器故障。\n";
+                }
+                else if(j==12) {
+                    results[resultsNum++] = "驻车指示灯故障！\n";
+                    results[resultsNum++] = "1. 电子驻车。\n" +
+                            "2. 指示灯故障。\n";
+                }
+            }
         }
         return dst;
     }
+
 
 }

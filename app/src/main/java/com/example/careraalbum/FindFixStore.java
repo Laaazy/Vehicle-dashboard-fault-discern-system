@@ -45,9 +45,14 @@ public class FindFixStore extends AppCompatActivity {
         //获取启动该活动的intent
         final Intent intent=getIntent();
         problem_type_info.setText(intent.getStringExtra("problem_type"));
+        //故障类型居中显示
         problem_type_info.setGravity(Gravity.CENTER);
+
         problem_reason_info.setText(intent.getStringExtra("problem_reason"));
+        //故障原因居中显示
         problem_reason_info.setGravity(Gravity.CENTER);
+
+        //显示图片
         picture.setImageURI(Uri.parse(intent.getStringExtra("image_uri")));
 
 

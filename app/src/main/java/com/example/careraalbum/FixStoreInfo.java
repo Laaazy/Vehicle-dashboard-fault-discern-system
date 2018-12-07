@@ -104,9 +104,14 @@ public class FixStoreInfo extends AppCompatActivity implements PoiSearch.OnPoiSe
 
 
 
-        //webView加载高德地图网页版
+        /*
+        *使用webView加载高德地图网页版，但网页版API简单，无法获得详细信息
+        *1.利用定位结果设置地图起点
+        *2.指定搜索点关键字
+        *3.加上开发者Key进行身份验证
+        */
         webView.getSettings().setJavaScriptEnabled(true);//支持js脚本
-        webView.setWebViewClient(new WebViewClient());//只在webview控件内加载网页
+        webView.setWebViewClient(new WebViewClient());//只在webview控件内加载网页,不离开应用程序
         webView.loadUrl("https://m.amap.com/around/?locations="+String.valueOf(startPoint.getLongitude()) +","
                 +String.valueOf(startPoint.getLatitude())+"&keywords=汽修,4S&"
                 +"defaultIndex=1&defaultView=list&searchRadius=5000&key=e97aad32b5973220e0a739c519971d10");
@@ -136,6 +141,15 @@ public class FixStoreInfo extends AppCompatActivity implements PoiSearch.OnPoiSe
         ActivityCollector.removeActivity(this);
     }
 
+    /*
+    *1.创建PoiSearch.Query对象，构造参数为POI关键字、POI编码(030000代表汽车维系)、建议城市
+    *2.设置查询结果配置，按距离排序、分页显示、每页条目数量
+    *3.设置搜索起点,搜索范围
+    *4.实现OnPoiSearchListener接口,implements PoiSearch.OnPoiSearchListener,
+    *  重写其onPoiSearched回调方法，在其中解析查询结果信息
+    *5.创建PoiSearch对象，为其设置监听器
+    *6.调用PoiSearch对象的searchPOIAsyn方法开始搜索POI，等待回调并解析
+    */
     protected void doSearchQuery(){
         currentPage=0;
         //设置查询POI代码，030000代表汽车维系
@@ -205,7 +219,15 @@ public class FixStoreInfo extends AppCompatActivity implements PoiSearch.OnPoiSe
         //此处无显示POI item的界面，do nothing
     }
 
-    //调用高德定位SDK获取当前位置，为startPoint赋值
+    /*
+    调用高德定位SDK获取当前位置，为startPoint赋值
+    使用步骤为：
+    1.创建LocationClient对象
+    2.创建LocationListener位置监听器，重写其onLocationChanged回调方法解析定位结果
+    3.创建LocationClientOption对象,在其中定制自己的定位模式，如：一次/多次定位，定位间隔
+    4.为LocationClient对象设置好LocationClientOption以及LocationListener
+    5.调用LocationClient的startLocation()方法发起定位请求，等待返回结果进行回调
+    */
     public void getLocation(){
         AMapLocationClient mapLocationClient=new AMapLocationClient(this.getApplicationContext());
         AMapLocationListener mapLocationListener=new AMapLocationListener() {
